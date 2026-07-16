@@ -115,11 +115,6 @@ tbody.innerHTML += `
 </tr>`;
     });
 
-    // Khali rows 50 tak
-    for(let i = dayRecords.length; i< 50; i++){
-tbody.innerHTML += `<tr><td>${i+1}</td><td></td><td>0</td><td>0</td></tr>`;
-    }
-
     // 2. BY Wise Total
     let settlement = {};
 dayRecords.forEach(r => {
