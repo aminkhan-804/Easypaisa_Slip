@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EASYPAiSA Login</title>
+<style>
+body{
+    font-family:Arial; 
+    background: linear-gradient(135deg, #0a8a4a, #00a651); 
+    display:flex; 
+    justify-content:center; 
+    align-items:center; 
+    height:100vh; 
+    margin:0;
+}
+.login-box{
+    background:white; 
+    padding:35px 30px; 
+    border-radius:12px; 
+    width:340px; 
+    box-shadow:0 8px 25px rgba(0,0,0,0.3);
+}
+h2{
+    text-align:center; 
+    color:#0a8a4a; 
+    margin-bottom:25px;
+}
+label{
+    font-weight:bold; 
+    font-size:14px;
+}
+input{
+    width:100%; 
+    padding:12px; 
+    margin:8px 0 18px 0; 
+    border:1px solid #ccc; 
+    border-radius:6px; 
+    box-sizing:border-box;
+    font-size:15px;
+}
+input:focus{
+    border-color:#0a8a4a; 
+    outline:none;
+}
+.btn{
+    width:100%; 
+    padding:14px; 
+    background:#0a8a4a; 
+    color:white; 
+    border:none; 
+    border-radius:6px; 
+    font-size:16px; 
+    font-weight:bold; 
+    cursor:pointer;
+}
+.btn:hover{
+    background:#06703a;
+}
+.error{
+    color:red; 
+    text-align:center; 
+    margin-top:12px; 
+    display:none; 
+    font-size:14px;
+}
+.note{
+    text-align:center; 
+    font-size:12px; 
+    color:#666; 
+    margin-top:15px;
+}
+</style>
+</head>
+<body>
+<div class="login-box">
+<h2>EASYPASA LOGIN</h2>
+
+<label>Username</label>
+<input type="text" id="username" placeholder="easypaisa" autocomplete="on">
+
+<label>Password</label>
+<input type="password" id="password" placeholder="*********">
+
+<button class="btn" onclick="login()">Login</button>
+<p class="error" id="error">Invalid Username or Password!</p>
+<p class="note"><b>dESigN_bY: ZOYA_X</b></p>
+</div>
+
+<script>
+function login(){
+    let user = document.getElementById('username').value.trim();
+    let pass = document.getElementById('password').value.trim();
+
+    if(user === "easypaisa" && pass === "easypaisa"){
+        localStorage.setItem("isLoggedIn", "true");
+        window.location = "dashboard.html"; // login ke baad dashboard pe jayega
+    }else{
+        document.getElementById('error').style.display = "block";
+    }
+}
+
+document.getElementById('password').addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        login();
+    }
+});
+</script>
+</body>
+</html>
