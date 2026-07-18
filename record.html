@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>All Records</title>
+<style>
+body{font-family:'Arial'; background:#eef2f7; margin:0; padding:0;}
+.navbar{background:#28a745; color:white; padding:12px 30px; display:flex; justify-content:space-between; align-items:center;}
+.logo{font-weight:bold; font-size:16px;}
+.menu a{color:white; text-decoration:none; margin-left:20px; font-weight:bold;}
+.container{max-width:1100px; margin:20px auto; background:white; border-radius:10px; padding:20px; box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+.header{display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;}
+.header h2{color:#28a745; margin:0;}
+.filters button{padding:8px 15px; border:1px solid #28a745; background:white; color:#28a745; border-radius:5px; cursor:pointer; margin-left:5px; font-weight:bold;}
+.filters button.active{background:#28a745; color:white;}
+table{width:100%; border-collapse:collapse; margin-top:15px;}
+th{background:#28a745; color:white; padding:10px; text-align:left; font-size:13px;}
+td{padding:10px; border-bottom:1px solid #ddd; font-size:13px;}
+.total-row{font-weight:bold; background:#f1f1f1;}
+.total-row td{text-align:right; padding-right:20px;}
+.btn-print{background:#28a745; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold; margin-top:15px;}
+</style>
+</head>
+<body>
+
+<div class="navbar">
+<div class="logo">EASyPAiSA SYSTEM</div>
+<div class="menu">
+<a href="dashboard.html">Dashboard</a>
+<a href="slip.html">Slip</a>
+<a href="history.html">History</a>
+<a href="settlement.html">Settlement</a>
+<a href="record.html">Record</a>
+<a href="logout.html">Logout</a>
+</div>
+</div>
+<h><b>dESigN_bY: ZOYA_X</b></h>
+
+<div class="container">
+<div class="header">
+<h2>Complete Records</h2>
+<div class="filters">
+<button onclick="filterRecords('all')" class="active" id="btn-all">All</button>
+<button onclick="filterRecords('week')" id="btn-week">This Week</button>
+<button onclick="filterRecords('month')" id="btn-month">This Month</button>
+<button onclick="filterRecords('year')" id="btn-year">This Year</button>
+</div>
+</div>
+
+<table id="recordTable">
+<thead>
+<tr>
+<th>Date</th>
+<th>Slip No</th>
+<th>To</th>
+<th>BY</th>
+<th>POS</th>
+<th>Jazz Cash</th>
+<th>Amount</th>
+</tr>
+</thead>
+<tbody id="recordBody">
+<!-- Data yahanaayega -->
+</tbody>
+<tfoot>
+<tr class="total-row">
+<td colspan="6">Total Amount - ALL</td>
+<td id="totalAmount">Rs 0</td>
+</tr>
+</tfoot>
+</table>
+
+<button class="btn-print" onclick="window.print()">Print This Report</button>
+</div>
+
+<script>
+let allRecords = [];
+
+window.onload = function(){
+loadRecords();
+}
+
+function loadRecords(){
+allRecords = JSON.parse(localStorage.getItem("records") || "[]");
+filterRecords('all'); // Default All
+}
+
+function filterRecords(type){
+  // Active button
+document.querySelectorAll('.filters button').forEach(b =>b.classList.remove('active'));
+document.getElementById('btn-'+type).classList.add('active');
+
+  let now = new Date();
+  let filtered = allRecords;
+
+  if(type === 'week'){
+    let weekAgo = new Date(); weekAgo.setDate(now.getDate() - 7);
+    filtered = allRecords.filter(r => new Date(r.date) >= weekAgo);
+  }
+  if(type === 'month'){
+    filtered = allRecords.filter(r => {
+      let d = new Date(r.date);
+      return d.getMonth() === now.getMonth() &&d.getFullYear() === now.getFullYear();
+    });
+  }
+  if(type === 'year'){
+    filtered = allRecords.filter(r => new Date(r.date).getFullYear() === now.getFullYear());
+  }
+
+displayRecords(filtered);
+}
+
+function displayRecords(records){
+  let tbody = document.getElementById('recordBody');
+tbody.innerHTML = '';
+  let total = 0;
+
+  if(records.length === 0){
+tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No Records Found</td></tr>';
+  } else {
+records.sort((a,b) => new Date(b.date) - new Date(a.date)); // Latest pehle
+
+records.forEach(r => {
+      total += Number(r.amount);
+      let date = r.date ? new Date(r.date).toLocaleDateString('en-GB') : 'N/A'; // undefined fix
+tbody.innerHTML += `
+<tr>
+<td>${date}</td>
+<td>${r.slipNo}</td>
+<td>${r.to}</td>
+<td>${r.by}</td>
+<td>${r.pos || '-'}</td>
+<td>${r.jazz || '-'}</td>
+<td>Rs ${Number(r.amount).toLocaleString()}</td>
+</tr>
+      `;
+    });
+  }
+
+document.getElementById('totalAmount').innerText = 'Rs ' + total.toLocaleString();
+}
+</script>
+
+</body>
+</html>

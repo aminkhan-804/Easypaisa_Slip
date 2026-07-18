@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Settlement</title>
+<style>
+body{font-family:Arial; background:#f5f5f5; margin:0; padding:0;}
+.navbar{background:#28a745; color:white; padding:12px 30px; display:flex; justify-content:space-between;}
+.logo{font-weight:bold; font-size:16px;}
+.menu a{color:white; text-decoration:none; margin-left:20px; font-weight:bold;}
+.container{max-width:1000px; margin:20px auto; background:white; padding:20px; border-radius:8px; box-shadow:0 0 10px #ccc;}
+h2{text-align:center; background:#ffd966; padding:10px; margin:0 0 20px 0;}
+.controls{text-align:center; margin-bottom:20px;}
+.controls input{padding:8px; border:1px solid #ccc; border-radius:4px;}
+.btn-print{background:#28a745; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; font-weight:bold; margin-left:10px;}
+.summary-title{background:#007bff; color:white; padding:10px; text-align:center; font-weight:bold; font-size:16px; margin-top:25px;}
+table{width:100%; border-collapse:collapse; margin-bottom:20px;}
+th, td{border:1px solid #ddd; padding:8px; text-align:center; font-size:13px;}
+th{background:#28a745; color:white;}
+.total-row{background:#ffdddd; font-weight:bold; font-size:14px;}
+.total-row2{background:#d4edda; font-weight:bold; font-size:14px;}
+.grand-total{background:#333; color:white; font-weight:bold; font-size:15px;}
+@media print {
+.navbar,.controls,.btn-print {display:none!important;}
+  body{background:white;}
+.container{box-shadow:none; margin:0; max-width:100%;}
+</style>
+</head>
+<body>
+
+<div class="navbar">
+<div class="logo">EASyPAiSA SYSTEM</div>
+<div class="menu">
+<a href="dashboard.html">Dashboard</a>
+<a href="slip.html">Slip</a>
+<a href="history.html">History</a>
+<a href="settlement.html">Settlement</a>
+<a href="record.html">Record</a>
+<a href="logout.html">Logout</a>
+</div>
+</div>
+<h><b>dESigN_bY: ZOYA_X</b><h>
+
+<div class="container" id="printArea">
+<h2>Settlement Report</h2>
+
+<div class="controls">
+<label><b>From:</b></label>
+<input type="date" id="fromDate" onchange="loadSettlement()">
+<label><b>To:</b></label>
+<input type="date" id="toDate" onchange="loadSettlement()">
+<button class="btn-print" onclick="window.print()">Print</button>
+</div>
+
+<!-- 1. All Transactions Details -->
+<div class="summary-title">All Transactions - Selected Days</div>
+<table>
+<thead>
+<tr>
+<th>Slip No</th><!-- S.Nohatadiya -->
+<th>Date</th>
+<th>To</th>
+<th>BY</th>
+<th>POS</th>
+<th>Amount</th>
+</tr>
+</thead>
+<tbody id="detailTable"></tbody>
+</table>
+
+<!-- 2. POS Wise Total -->
+<div class="summary-title">POS Wise Total</div>
+<table>
+<thead>
+<tr>
+<th>POS</th><!-- S.Nohatadiya -->
+<th>Total Count</th>
+<th>Total Amount</th>
+</tr>
+</thead>
+<tbody id="posSummary"></tbody>
+</table>
+
+<!-- 3. BY Wise Total -->
+<div class="summary-title">BY Wise Total</div>
+<table>
+<thead>
+<tr>
+<th>BY</th><!-- S.Nohatadiya -->
+<th>Total Count</th>
+<th>Total Amount</th>
+</tr>
+</thead>
+<tbody id="bySummary"></tbody>
+</table>
+
+<p style="text-align:left; margin-top:30px;">Sign: ____________________</p>
+
+</div>
+
+<script>
+window.onload = function(){
+  let now = new Date();
+  let sevenDaysAgo = new Date();
+sevenDaysAgo.setDate(now.getDate() - 7);
+
+document.getElementById('fromDate').value = `${sevenDaysAgo.getFullYear()}-${String(sevenDaysAgo.getMonth()+1).padStart(2,'0')}-${String(sevenDaysAgo.getDate()).padStart(2,'0')}`;
+document.getElementById('toDate').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+loadSettlement();
+}
+
+function loadSettlement(){
+  let records = JSON.parse(localStorage.getItem('records')) || [];
+  let from = document.getElementById('fromDate').value;
+  let to = document.getElementById('toDate').value;
+
+  let filtered = records.filter(rec => {
+    return rec.date>= from &&rec.date<= to;
+  });
+
+showDetails(filtered);
+makeSummary(filtered);
+}
+
+function showDetails(data){
+  let tbody = document.getElementById('detailTable');
+tbody.innerHTML = '';
+  let grandTotal = 0;
+
+  if(data.length === 0){
+tbody.innerHTML = `<tr><td colspan="6">No Record Found</td></tr>`;
+    return;
+  }
+
+data.forEach(rec => {
+tbody.innerHTML += `<tr>
+<td>${rec.slipNo? rec.slipNo : '-'}</td><!-- S.Nokijaga Slip No -->
+<td>${rec.date}</td>
+<td>${rec.to}</td>
+<td>${rec.by}</td>
+<td>${rec.pos}</td>
+<td>${Number(rec.amount) || 0}</td>
+</tr>`;
+grandTotal += Number(rec.amount) || 0;
+  });
+
+tbody.innerHTML += `<tr class="grand-total">
+<td colspan="5">Grand Total</td>
+<td>${grandTotal}</td>
+</tr>`;
+}
+
+function makeSummary(data){
+  let posObj = {};
+  let byObj = {};
+
+data.forEach(rec => {
+    let pos = rec.pos || '0';
+    let by = rec.by || 'Unknown';
+    let amt = Number(rec.amount) || 0;
+
+    if(!posObj[pos]) posObj[pos] = {count:0, total:0};
+posObj[pos].count++;
+posObj[pos].total += amt;
+
+    if(!byObj[by]) byObj[by] = {count:0, total:0};
+byObj[by].count++;
+byObj[by].total += amt;
+  });
+
+  // POS Table
+  let posHtml = ''; let posTotalAmt = 0; let posTotalCount = 0;
+  for(let key in posObj){
+posHtml += `<tr><td>${key}</td><td>${posObj[key].count}</td><td>${posObj[key].total}</td></tr>`;
+posTotalAmt += posObj[key].total;
+posTotalCount += posObj[key].count;
+  }
+posHtml += `<tr class="total-row"><td>Total</td><td>${posTotalCount}</td><td>${posTotalAmt}</td></tr>`;
+document.getElementById('posSummary').innerHTML = posHtml || `<tr><td colspan="3">No Record Found</td></tr>`;
+
+  // BY Table
+  let byHtml = ''; let byTotalAmt = 0; let byTotalCount = 0;
+  for(let key in byObj){
+byHtml += `<tr><td>${key}</td><td>${byObj[key].count}</td><td>${byObj[key].total}</td></tr>`;
+byTotalAmt += byObj[key].total;
+byTotalCount += byObj[key].count;
+  }
+byHtml += `<tr class="total-row2"><td>Total</td><td>${byTotalCount}</td><td>${byTotalAmt}</td></tr>`;
+document.getElementById('bySummary').innerHTML = byHtml || `<tr><td colspan="3">No Record Found</td></tr>`;
+}
+</script>
+
+</body>
+</html>

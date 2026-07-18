@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EASyPAiSA Dashboard</title>
+<style>
+body{font-family:Arial; background:#f5f5f5; margin:0; padding:0;}
+.nav{background:#0a8a4a; padding:15px 20px; color:white; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; position:sticky; top:0;}
+.nav b{font-size:18px;}
+.nav-links a{color:white; margin:0 8px; text-decoration:none; font-weight:bold; padding:8px 12px; border-radius:5px;}
+.nav-links a:hover{background:rgba(255,255,255,0.2);}
+.container{max-width:1000px; margin:20px auto; padding:20px;}
+h2{color:#0a8a4a; margin-bottom:20px;}
+.card-wrap{display:flex; gap:15px; flex-wrap:wrap;}
+.card{flex:1; min-width:250px; background:#0a8a4a; color:white; padding:25px; border-radius:10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+.card h3{margin:0; font-size:32px;}
+.card p{margin:8px 0 0; font-size:15px;}
+.btn-new{display:inline-block; margin-top:25px; padding:14px 25px; background:#0a8a4a; color:white; text-decoration:none; border-radius:6px; font-weight:bold;}
+.btn-new:hover{background:#06703a;}
+</style>
+</head>
+<body>
+
+<div class="nav">
+<b>EASyPAiSA SYSTEM</b>
+<div class="nav-links">
+<a href="dashboard.html">Dashboard</a>
+<a href="slip.html">Slip</a>
+<a href="history.html">History</a>
+<a href="settlement.html">Settlement</a>
+<a href="record.html">Record</a>
+<a href="#" onclick="logout()">Logout</a>
+</div>
+</div>
+<h><b>dESigN_bY: ZOYA_X</b></h>
+<div class="container">
+<h2>Dashboard</h2>
+
+<div class="card-wrap">
+<div class="card">
+<h3 id="totalSlips">0</h3>
+<p>Total Slips</p>
+</div>
+<div class="card">
+<h3 id="totalAmount">0</h3>
+<p>Total Amount</p>
+</div>
+<div class="card">
+<h3 id="todaySlips">0</h3>
+<p>Today's Slips</p>
+</div>
+</div>
+
+<a href="slip.html" class="btn-new">+ New Slip</a>
+
+</div>
+
+<script>
+// Login Check
+if(localStorage.getItem("isLoggedIn")!== "true"){
+window.location = "index.html";
+}
+
+function logout(){
+localStorage.removeItem("isLoggedIn");
+window.location = "index.html";
+}
+
+// Data Load from localStorage
+let records = JSON.parse(localStorage.getItem("records") || "[]");
+let today = new Date().toISOString().split('T')[0];
+let todayRec = records.filter(r =>r.date == today);
+let totalAmt = records.reduce((a,b) => a + Number(b.amount || 0), 0);
+
+document.getElementById('totalSlips').innerText = records.length;
+document.getElementById('totalAmount').innerText = totalAmt;
+document.getElementById('todaySlips').innerText = todayRec.length;
+</script>
+</body>
+</html>

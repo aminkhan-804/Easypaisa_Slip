@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>New Slip</title>
+<style>
+body{font-family:'Arial'; background:#eef2f7; margin:0; padding:0;}
+.navbar{background:#28a745; color:white; padding:12px 30px; display:flex; justify-content:space-between;}
+.logo{font-weight:bold; font-size:16px;}
+.menu a{color:white; text-decoration:none; margin-left:20px; font-weight:bold;}
+.container{max-width:500px; margin:30px auto; background:white; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.1); overflow:hidden; border-top:5px solid #28a745;}
+.header{background:#28a745; color:white; text-align:center; padding:15px;}
+.header h2{margin:0; font-size:22px;}
+.form-body{padding:20px;}
+.row{display:flex; gap:15px; margin-bottom:15px;}
+.group{flex:1;}
+.group label{display:block; font-weight:bold; font-size:12px; margin-bottom:5px; color:#333;}
+.group input{width:95%; padding:10px; border:1px solid #ccc; border-radius:5px; font-size:14px;}
+.readonly{background:#e9ecef; font-weight:bold; color:#000;}
+.btn-box{text-align:center; margin-top:20px;}
+.btn-print{background:#28a745; color:white; border:none; padding:12px 30px; border-radius:5px; cursor:pointer; font-weight:bold; font-size:16px; width:100%;}
+</style>
+</head>
+<body>
+
+<div class="navbar">
+<div class="logo">EASyPAiSA SYSTEM</div>
+<div class="menu">
+<a href="dashboard.html">Dashboard</a>
+<a href="slip.html">Slip</a>
+<a href="history.html">History</a>
+<a href="settlement.html">Settlement</a>
+<a href="record.html">Record</a>
+<a href="logout.html">Logout</a>
+</div>
+</div>
+
+<div class="container">
+<div class="header">
+<h2>EASyPAiSA</h2>
+<p style="margin:5px 0 0 0; font-size:12px;">Transaction Slip</p>
+</div>
+
+<div class="form-body">
+<div class="row">
+<div class="group"><label>Slip No</label><input type="text" id="slipNo" class="readonly" readonly></div>
+<div class="group"><label>Date & Time</label><input type="text" id="slipDateTime" class="readonly" readonly></div>
+</div>
+<div class="row">
+<div class="group"><label>To / EASYPASA</label><input type="text" id="to" placeholder="Customer Name"></div>
+<div class="group"><label>BY</label><input type="text" id="by" placeholder="Agent Name"></div>
+</div>
+<div class="row">
+<div class="group"><label>POS</label><input type="number" id="pos" placeholder="POS Number"></div>
+<div class="group"><label>JAZZ CASH</label><input type="text" id="jazz" placeholder="Account No"></div>
+</div>
+<div class="row">
+<div class="group"><label>Amount</label><input type="number" id="amount" placeholder="Rs. 0"></div>
+</div>
+<div class="btn-box">
+<button class="btn-print" onclick="saveAndPrint()">Save & Print Slip</button>
+</div>
+</div>
+</div>
+<h><b>dESigN_bY: ZOYA_X</b></h>
+
+<script>
+window.onload = function(){
+  let now = new Date();
+  let date = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  let dateTime = `${now.getMonth()+1}/${now.getDate()}/${now.getFullYear()} ${now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}`;
+document.getElementById('slipDateTime').value = dateTime;
+loadSlipNo(date);
+}
+
+function loadSlipNo(todayDate){
+  let records = JSON.parse(localStorage.getItem("records") || "[]");
+
+  // ??????? records
+  let todaysRecords = records.filter(r =>r.date === todayDate);
+
+  // ???????? = ???? records ??????? + 1
+document.getElementById('slipNo').value = todaysRecords.length + 1;
+}
+
+function saveAndPrint(){
+  let slipNo = document.getElementById('slipNo').value;
+  let dateTime = document.getElementById('slipDateTime').value;
+  let todayDate = new Date().toISOString().split('T')[0];
+  let to = document.getElementById('to').value;
+  let by = document.getElementById('by').value;
+  let pos = document.getElementById('pos').value;
+  let jazz = document.getElementById('jazz').value;
+  let amount = document.getElementById('amount').value;
+
+  if(!to || !by || !amount){ alert("To, BY and Amount fill karnalazmihai!"); return; }
+
+  let records = JSON.parse(localStorage.getItem("records") || "[]");
+  // ID ???????????? delete ??????????
+  let newId = Date.now();
+records.push({id: newId, slipNo: Number(slipNo), date: todayDate, dateTime: dateTime, to: to, by: by, pos: pos, jazz: jazz, amount: Number(amount)});
+localStorage.setItem("records", JSON.stringify(records));
+
+  // Print
+  let printWindow = window.open('', '', 'width=300,height=600');
+printWindow.document.write(`
+<html>
+<head>
+<title>Print Slip</title>
+<style>
+        body{width:80mm; font-family:Arial; font-size:11px; margin:0; padding:3px; color:#000;}
+        table{width:100%; border-collapse:collapse;}
+        td, th{border:1px solid #000; padding:4px; text-align:left;}
+        .center{text-align:center; font-weight:bold;}
+        .header-title{font-size:13px;}
+</style>
+</head>
+<body onload="window.print(); window.close();">
+<table>
+<tr><td colspan="2" class="center header-title">EASYPAISA SLIPS</td></tr>
+<tr><td colspan="2" class="center">${dateTime}</td></tr>
+<tr><td colspan="2" class="center">Slip NO: ${slipNo}</td></tr>
+<tr><td><b>EASYPAISA</b></td><td>${to}</td></tr>
+<tr><td><b>BY</b></td><td>${by}</td></tr>
+<tr><td><b>POS</b></td><td>${pos}</td></tr>
+<tr><td><b>JAZZ CASH</b></td><td>${jazz}</td></tr>
+<tr><td><b>AMOUNT</b></td><td>Rs ${amount}</td></tr>
+<tr><td colspan="2" style="height:30px;"><b>SIGN:</b></td></tr>
+</table>
+</body>
+</html>
+  `);
+printWindow.document.close();
+
+document.getElementById('to').value = ''; 
+document.getElementById('by').value = '';
+document.getElementById('pos').value = ''; 
+document.getElementById('jazz').value = '';
+document.getElementById('amount').value = '';
+
+loadSlipNo(todayDate); // ????????????
+  alert("Record Saved Successfully!");
+}
+</script>
+</body>
+</html>
