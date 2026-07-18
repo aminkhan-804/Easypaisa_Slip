@@ -1,1 +1,0 @@
-# Easypaisa_Slip
